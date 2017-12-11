@@ -25,7 +25,7 @@ public class NoticeTask implements Runnable {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    private Thread thread = Thread.currentThread();
+    private Thread thread;
 
     private static OkHttpClient okHttpClient;
 
@@ -59,6 +59,7 @@ public class NoticeTask implements Runnable {
 
     @Override
     public void run() {
+        thread = Thread.currentThread();
         Long[] intervals = timeDefinition.getIntervals();
         Notice notice = new Notice(url, body);
         String futureGet = null;
