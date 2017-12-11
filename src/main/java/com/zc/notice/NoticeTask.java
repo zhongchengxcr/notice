@@ -25,6 +25,8 @@ public class NoticeTask implements Runnable {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
+    private Thread thread = Thread.currentThread();
+
     private static OkHttpClient okHttpClient;
 
     private final static String SUCCESS = "SUCCESS";
@@ -40,7 +42,6 @@ public class NoticeTask implements Runnable {
     private boolean startNow = true;
 
     static {
-
         okHttpClient = new OkHttpClient.Builder()
                 //.addInterceptor(new GzipRequestInterceptor())
                 .connectTimeout(5, TimeUnit.SECONDS)
@@ -59,7 +60,6 @@ public class NoticeTask implements Runnable {
     @Override
     public void run() {
         Long[] intervals = timeDefinition.getIntervals();
-
         Notice notice = new Notice(url, body);
         String futureGet = null;
 
@@ -78,21 +78,20 @@ public class NoticeTask implements Runnable {
         }
 
         for (Long interval : intervals) {
+            if (!thread.isInterrupted()) {
+                Future<String> future = scheduledExecutorService.schedule(notice, interval, TimeUnit.SECONDS);
 
-            Future<String> future = scheduledExecutorService.schedule(notice, interval, TimeUnit.SECONDS);
-
-            try {
-                String res = future.get();
-                logger.info("Scheduler call http res:{}", res);
-                if (!StringUtils.isEmpty(res) && SUCCESS.equals(res.trim().toUpperCase())) {
-                    break;
+                try {
+                    String res = future.get();
+                    logger.info("Scheduler call http res:{}", res);
+                    if (!StringUtils.isEmpty(res) && SUCCESS.equals(res.trim().toUpperCase())) {
+                        break;
+                    }
+                } catch (InterruptedException | ExecutionException e) {
+                    logger.error("Scheduler call http error!", e);
                 }
-            } catch (InterruptedException | ExecutionException e) {
-                logger.error("Scheduler call http error!", e);
             }
-
         }
-
 
     }
 

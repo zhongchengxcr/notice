@@ -1,5 +1,9 @@
 package com.zc.notice;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+
 /**
  * 说明 . <br>
  * <p>
@@ -58,4 +62,13 @@ public class User {
         this.height = height;
         return this;
     }
+
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+
+        FutureTask a = new FutureTask(()-> System.out.printf(""));
+        a.get();
+
+        Thread d = new Thread(a);
+
+     }
 }

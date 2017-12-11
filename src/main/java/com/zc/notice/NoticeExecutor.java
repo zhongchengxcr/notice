@@ -41,9 +41,10 @@ public class NoticeExecutor {
 
     private final AtomicLong noticeScheduled = new AtomicLong();
 
-    private final static int NOTICE_TASK_THREAD_NUM = 20;
 
-    private final static int NOTICE_SCHEDULED_THREAD_NUM = 20;
+    private final static int NOTICE_TASK_THREAD_NUM = 10;
+
+    private final static int NOTICE_SCHEDULED_THREAD_NUM = 10;
 
     private NoticeExecutor() {
 
@@ -61,9 +62,14 @@ public class NoticeExecutor {
             return thread;
         };
 
-        noticeTaskExecutor = Executors.newFixedThreadPool(NOTICE_TASK_THREAD_NUM, noticeTaskThreadFactory);
-        noticeScheduledExecutor = Executors.newScheduledThreadPool(NOTICE_SCHEDULED_THREAD_NUM, noticeScheduledThreadFactory);
 
+        //固定线程数，超出就等待，最大等待排队50个，超出再等待
+        noticeTaskExecutor = new ThreadPoolExecutor(NOTICE_TASK_THREAD_NUM, NOTICE_TASK_THREAD_NUM,
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(50),
+                noticeTaskThreadFactory);
+
+        noticeScheduledExecutor = new ScheduledThreadPoolExecutor(NOTICE_SCHEDULED_THREAD_NUM, noticeScheduledThreadFactory);
 
     }
 
@@ -101,7 +107,6 @@ public class NoticeExecutor {
         }
 
     }
-
 
 
 }
